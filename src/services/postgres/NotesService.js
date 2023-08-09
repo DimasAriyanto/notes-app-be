@@ -34,7 +34,8 @@ class NotesService {
 
   async getNotes(owner) {
     const query = {
-      text: `SELECT notes.* FROM notes
+      text: `SELECT notes.* 
+      FROM notes
       LEFT JOIN collaborations ON collaborations.note_id = notes.id
       WHERE notes.owner = $1 OR collaborations.user_id = $1
       GROUP BY notes.id`,
@@ -95,15 +96,11 @@ class NotesService {
       text: 'SELECT * FROM notes WHERE id = $1',
       values: [id],
     };
-
     const result = await this._pool.query(query);
-
     if (!result.rows.length) {
       throw new NotFoundError('Catatan tidak ditemukan');
     }
-
     const note = result.rows[0];
-
     if (note.owner !== owner) {
       throw new AuthorizationError('Anda tidak berhak mengakses resource ini');
     }
@@ -116,7 +113,6 @@ class NotesService {
       if (error instanceof NotFoundError) {
         throw error;
       }
-
       try {
         await this._collaborationService.verifyCollaborator(noteId, userId);
       } catch {
